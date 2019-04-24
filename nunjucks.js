@@ -10,10 +10,22 @@ nunjucks.configure("views", {
   watch: true
 });
 
+app.use(express.urlencoded({ extended: false }));
 app.set("view engine", "njk"); //Seta uma variavel global, nessa caso sera como vamos chamar o nunjucks
 
+const users = ["Guilherme Santos", "Diego Fernandes", "Cleiton Souza"];
+
 app.get("/", (req, res) => {
-  return res.render("list", { name: "Guilherme" });
+  return res.render("list", { users });
 });
 
-app.listen(3000);
+app.get("/new", (req, res) => {
+  return res.render("new");
+});
+
+app.post("/create", (req, res) => {
+  users.push(req.body.user);
+  return res.redirect("/");
+});
+
+app.listen(3333);
