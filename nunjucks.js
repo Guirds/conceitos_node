@@ -11,7 +11,7 @@ nunjucks.configure('views', {
 })
 
 app.use(express.urlencoded({ extended: false }))
-app.set('view engine', 'njk') // Seta uma variavel global, nessa caso sera como vamos chamar o nunjucks
+app.set('view engine', 'njk') // Seta uma variavel global
 
 const users = ['Guilherme Santos', 'Diego Fernandes', 'Cleiton Souza']
 
