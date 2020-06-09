@@ -1,22 +1,20 @@
 {
-  "name": "NodeJS",
+  "name": "backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/server.js",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon nunjucks.js"
+    "dev": "nodemon",
+    "test": "jest"
   },
   "dependencies": {
-    "express": "^4.16.4",
-    "nunjucks": "^3.2.0"
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "uuidv4": "^6.0.7"
   },
   "devDependencies": {
-    "eslint": "^5.16.0",
-    "eslint-config-standard": "^12.0.0",
-    "eslint-plugin-import": "^2.17.2",
-    "eslint-plugin-node": "^8.0.1",
-    "eslint-plugin-promise": "^4.1.1",
-    "eslint-plugin-standard": "^4.0.0",
-    "nodemon": "^1.18.11"
+    "jest": "^25.2.6",
+    "nodemon": "^2.0.2",
+    "supertest": "^4.0.2"
   }
 }
