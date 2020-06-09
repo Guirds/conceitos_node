@@ -1,75 +1,92 @@
 const express = require('express');
+const { uuid, isUuid } = require('uuidv4');
 
-const server = express();
-server.use(express.json());
+const app = express();
+app.use(express.json());
+app.use('/projects/:id', validateProjectId);
 
-const users = ["Gui", "Lelo", "Jorge", "Pedro"];
+const projects = [];
 
+function logRequests(req, res, next) {
+  const { method, url } = req;
 
-// Middleware Global
-server.use((req, res, next) => {
-  console.time('Request');
+  const lobLabel = `[${method.toUpperCase()}] ${url}`;
 
-  console.log(`Método: ${req.method}; URL: ${req.url}`);
+  console.log("Executou middleware de log")
+  console.time(lobLabel);
 
   next();
 
-  console.timeEnd('Request');
-})
+  console.log("Terminou middleware de log")
+  console.timeEnd(lobLabel);
+}
 
-function checkUserExists(req, res, next) {
-  if (!req.body.name) {
-    return res.status(400).json({ error: 'User name is required' });
+function validateProjectId(req, res, next) {
+  const { id } = req.params;
+
+  if (!isUuid(id)) {
+    return res.status(400).json({ error: 'Invalid project ID.' })
   }
 
   return next();
 }
 
-function checkUserInArray(req, res, next) {
-  const user = users[req.params.index];
+app.get('/projects', logRequests, (req, res) => {
+  console.log("Executou middleware de rota (GET)");
+  const { title } = req.query;
+  const results = title
+    ? projects.filter(project => project.title.includes(title))
+    : projects;
 
-  if (!user) {
-    return res.status(400).json({ error: 'User does not exist' })
+  return res.json(results)
+});
+
+app.post('/projects', (req, res) => {
+  const { title, owner } = req.body;
+
+  const project = { id: uuid(), title, owner };
+
+  projects.push(project);
+
+  return res.json(project);
+});
+
+app.put('/projects/:id', (req, res) => {
+  const { id } = req.params;
+  const { title, owner } = req.body;
+
+  const projectIndex = projects.findIndex(project => project.id === id);
+
+  if (projectIndex < 0) {
+    return res.status(400).json({ error: "Project not found." });
   }
 
-  req.user = user;
+  const project = {
+    id,
+    title,
+    owner
+  }
 
-  return next();
-}
+  projects[projectIndex] = project;
 
-server.get('/users/:index', checkUserInArray, (req, res) => {
-  return res.json(req.user);
+  return res.json(projects)
 });
 
-server.get('/users', (req, res) => {
-  return res.send(users);
+app.delete('/projects/:id', (req, res) => {
+  const { id } = req.params;
+
+  const projectIndex = projects.findIndex(project => project.id === id);
+
+  if (projectIndex < 0) {
+    return res.status(400).json({ error: "Project not found." });
+  }
+
+  projects.splice(projectIndex, 1);
+
+  // 204 = retorna uma requisação de sucess sem conteúdo.
+  return res.status(204).send();
 });
 
-server.post('/users', checkUserExists, (req, res) => {
-  const { name } = req.body;
-
-  users.push(name);
-
-  return res.json(users);
-});
-
-server.put('/users/:index', checkUserInArray, checkUserExists, (req, res) => {
-  const { index } = req.params;
-  const { name } = req.body;
-
-  users[index] = name;
-
-  return res.send(users)
+app.listen(3333, () => {
+  console.log('🚀 Back-end started!');
 })
-
-server.delete('/users/:index', checkUserInArray, checkUserInArray, (req, res) => {
-  const { index } = req.params;
-
-  users.splice(index, 1);
-
-  // return res.send(users);
-  // é uma boa prática não retornar valor quando se deleta.
-  return res.send();
-})
-
-server.listen(3000);
